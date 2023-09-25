@@ -1,0 +1,46 @@
+name: Pushing Updated Image CI
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - metadata/Dockerfile  
+      
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Logging into GitHub Container Registry  
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GH_TOKEN }}
+      - uses: actions/checkout@v2
+      - name: Check Dockerfile and Update Image 
+        id: update_image
+        run: |
+          cd metadata
+          if [ $(cat Dockerfile | grep . | wc -l) -gt 1 ]; then
+            dockername="${{ github.event.repository.name }}"
+            #dockername=$(head -n 1 Dockerfile | grep . | cut -d'/' -f3 | cut -d':' -f1)
+            new_tag=$(echo $(TZ=EST5EDT date +%b_%d_%I-%M-%S_%Y) | tr '[:upper:]' '[:lower:]')
+            echo $dockername
+            echo $new_tag
+            sudo snap install yq
+            echo "Updating image from Dockerfile"
+            docker build . -t $dockername
+            docker tag $dockername ghcr.io/compbiocore/$dockername:$new_tag
+            docker push ghcr.io/compbiocore/$dockername:$new_tag
+            docker tag $dockername ghcr.io/compbiocore/$dockername:latest
+            docker push ghcr.io/compbiocore/$dockername:latest
+            git config --global user.name "someone"
+            git config --global user.email "someone@someplace.com"
+            mkdir -p docker_builds
+            mkdir -p docker_builds/$new_tag
+            mv Dockerfile docker_builds/$new_tag/Dockerfile
+            echo "FROM ghcr.io/compbiocore/$dockername:$new_tag" > Dockerfile
+            git add -A 
+            git commit -m "Dockerfile pulling from latest repo image"
+            git push origin main 
+          fi
