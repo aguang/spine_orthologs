@@ -1,11 +1,8 @@
-# CBC analysis template
+# Echinoderma spine orthologs
 
-Template for analyses repositories. For more information see https://compbiocore-brown.slab.com/posts/data-organisation-for-analysis-repos-fdi2cddd. Folders that should be present in all such repositories are:
+## References
 
- * **metadata:** files such as sample manifests, YAML control files, and Dockerfiles 
- * **scripts:** additional scripts created for analysis of data
-
-**Note:** If you are including a Dockerfile, make sure it starts with the FROM statement; do not use any commenting or labeling before that statement. 
+ * *H.pulcherrimus:* https://cell-innovation.nig.ac.jp/cgi-bin/Hpul_public/Hpul_annot_download.cgi
 
 Optional directories are:
 
