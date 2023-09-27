@@ -1,6 +1,7 @@
 # 9/25/23
 
  * Initial docker image by pulling from [daviedmms/orthofinder](https://hub.docker.com/r/davidemms/orthofinder)
+    * Started to add in transdecoder but haven't built image with it yet
  * To run example analysis:
  ```
  docker run -v /Users/aguang/CORE/spine_orthologs/data/OrthoFinder/ExampleData/:/root/ExampleData --rm spine_orthologs:20230925 orthofinder -f ExampleData/
@@ -15,3 +16,4 @@
  ```
  docker run -v /Users/aguang/CORE/spine_orthologs/data/proteomes/:/root/proteomes --rm spine_orthologs:20230925 orthofinder -f proteomes/
  ```
+ * Set up batch script on Oscar and ran Orthofinder on data thru singularity
