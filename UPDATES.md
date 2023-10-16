@@ -1,3 +1,8 @@
+# 10/16/23
+
+ * Script for transdecoder for ET transcriptome to convert to proteome. We only do the pfam search for now but can add in blastp later.
+ * Initial docker image but it's running into some issues with builds, maybe it's internet connectivity though
+
 # 9/25/23
 
  * Initial docker image by pulling from [daviedmms/orthofinder](https://hub.docker.com/r/davidemms/orthofinder)
