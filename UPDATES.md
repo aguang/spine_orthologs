@@ -1,3 +1,7 @@
+# 10/26/23
+
+ * OrthoFinder and transdecoder finished running, analyzing on R now.
+
 # 10/16/23
 
  * Script for transdecoder for ET transcriptome to convert to proteome. We only do the pfam search for now but can add in blastp later.
