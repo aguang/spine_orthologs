@@ -2,7 +2,7 @@
 
 #SBATCH -n 4
 #SBATCH --mem=16G
-#SBATCH -t 1:00:00
+#SBATCH -t 24:00:00
 
 module load transdecoder
 module load blast/2.6.0+ hmmer/3.1b2

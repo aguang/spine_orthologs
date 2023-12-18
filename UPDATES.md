@@ -1,4 +1,5 @@
-# 12/18/23 - trinotate, []
+
+# 12/18/23 - trinotate, [issue #14](https://github.com/aguang/spine_orthologs/issues/14)
 
 # 12/15/23 - transcriptome assembly QC, [issue #13](https://github.com/aguang/spine_orthologs/issues/13)
 
@@ -8,7 +9,18 @@
 
 # 12/11/23
 
- * Agalma2.0.0 has run on all
+ * Downloaded singularity image of staphb/bowtie2 to `metadata` folder.
+ * Assembly with agalma was finished last week, however LvOv was not run. All others were, so we will make a note of this as an issue to revisit later.
+ * Ran [assembly QC with bowtie2](https://github.com/trinityrnaseq/trinityrnaseq/wiki/RNA-Seq-Read-Representation-by-Trinity-Assembly) on all successfully assembled transcriptomes. To pass QC, the majority of all reads should map back to the assembly, and ~70-80% of mapped fragments should be mapped as proper pairs, i.e. aligning concordantly to alignment 1 or more times.
+
+# 11/30/23
+
+ * Downloaded agalma Docker image to `metadata` folder
+ * Catalogued all FASTQ files into agalma db
+
+# 10/26/23
+
+ * OrthoFinder and transdecoder finished running, analyzing on R now.
 
 # 10/16/23
 
