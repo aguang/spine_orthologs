@@ -1,3 +1,15 @@
+# 12/18/23 - trinotate, []
+
+# 12/15/23 - transcriptome assembly QC, [issue #13](https://github.com/aguang/spine_orthologs/issues/13)
+
+ * QC for transcriptome assembly is done
+ * Summary: Since the spine analysis depends on the quality of the transcriptome, I assessed the transcriptome quality by mapping the RNAseq reads back to the assembled transcriptome. In a perfect scenario, almost all the reads map back to the assembly and around 70-80% of them will map back as paired reads. For these species, around 75% map back, with ET/Pencil being lower at around 65%. Around 55% map as pairs and the rest of the 65-80% map when they are unpaired. I attached two, LvGrn and Pencil alignment stats to show as examples.
+ * This is not ideal, but also not indicative of anything being terribly wrong like contamination. Usually this means that many of the assembled transcripts are fragmented due to low coverage, so fewer properly paired reads will align to the individual contigs and some will not align at all. The main two ways to improve that would be to do more sequencing, or to see if incorporating a reference improves the assembly by providing scaffolding at certain points. Regardless, I can proceed with the next steps and if we want to improve the assembly it can be parallel work or we can return to it.
+
+# 12/11/23
+
+ * Agalma2.0.0 has run on all
+
 # 10/16/23
 
  * Script for transdecoder for ET transcriptome to convert to proteome. We only do the pfam search for now but can add in blastp later.
