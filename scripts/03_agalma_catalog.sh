@@ -41,8 +41,8 @@ cat ${FASTQS}/Hp*_R1_001.fastq.gz > ${FASTQS}/combined/Hp_combined_R1_001.fastq.
 cat ${FASTQS}/Hp*_R2_001.fastq.gz > ${FASTQS}/combined/Hp_combined_R2_001.fastq.gz
 cat ${FASTQS}/LvGrn*_R1_001.fastq.gz > ${FASTQS}/combined/LvGrn_combined_R1_001.fastq.gz
 cat ${FASTQS}/LvGrn*_R2_001.fastq.gz > ${FASTQS}/combined/LvGrn_combined_R2_001.fastq.gz
-cat ${FASTQS}/LvOv*_R1_001.fastq.gz > ${FASTQS}/combined/LvOv_combined_R1_001.fastq.gz
-cat ${FASTQS}/LvOv*_R2_001.fastq.gz > ${FASTQS}/combined/LvOv_combined_R2_001.fastq.gz
+cat ${FASTQS}/LvOv*_1.fq.gz > ${FASTQS}/combined/LvOv_combined_R1_001.fastq.gz
+cat ${FASTQS}/LvOv*_2.fq.gz > ${FASTQS}/combined/LvOv_combined_R2_001.fastq.gz
 cat ${FASTQS}/LvRed*_R1_001.fastq.gz > ${FASTQS}/combined/LvRed_combined_R1_001.fastq.gz
 cat ${FASTQS}/LvRed*_R2_001.fastq.gz > ${FASTQS}/combined/LvRed_combined_R2_001.fastq.gz
 cat ${FASTQS}/Pencil*_R1_001.fastq.gz > ${FASTQS}/combined/Pencil_combined_R1_001.fastq.gz

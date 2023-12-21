@@ -1,5 +1,21 @@
+# 12/20/23 - transdecoder, LvOv assembly run
+
+## LvOv assembly
+
+ * LvOv assembly issue was that the LvOv files are titled differently (no R001_1 or anything) so the command to cat all replicates into one file produced nothing. Did the correct `cat` command and started running, folder is `transcriptome-10`
+ * Ended in an error however
+ * `Error, cmd: /opt/agalma/opt/trinity-2.5.1/util/..//trinity-plugins/jellyfish/bin/jellyfish count -t 32 -m 25 -s 38372075584  --canonical  both.fa died with ret 9 at /opt/agalma/opt/trinity-2.5.1/util/insilico_read_normalization.pl line 758.` 
+ * Indicates out of memory, so need to increase
+
+## Transdecoder
+
+ * Set up script in 06_transdecoder.sh, running for all organisms except LvOv right now
+ * For some reason LvGrn Trinity.fasta is not concordant with the one from the agalma report, but the rest of them are. But we use the Trinity.fasta rather than the ones from the reports anyway.
 
 # 12/18/23 - trinotate, [issue #14](https://github.com/aguang/spine_orthologs/issues/14)
+
+ * need to do transdecoder before doing trinotate
+ * annotation is also separate from orthology inference, so going to do OrthoFinder2 and OrthoSNAP after transdecoder instead
 
 # 12/15/23 - transcriptome assembly QC, [issue #13](https://github.com/aguang/spine_orthologs/issues/13)
 

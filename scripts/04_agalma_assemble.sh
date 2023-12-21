@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -c 20
-#SBATCH --mem 160G
+#SBATCH --mem 240G
 #SBATCH -t 4-00:00:00
 #SBATCH -C intel
-#SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/04_agalma_transcriptome-Hp-%J.err
-#SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/04_agalma_transcriptome-Hp-%J.out
+#SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/04_agalma_transcriptome-LvOv-%J.err
+#SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/04_agalma_transcriptome-LvOv-%J.out
 
 WORKDIR=/oscar/data/datasci/aguang/spine_orthologs
 DATA=$WORKDIR/data/agalma
@@ -16,9 +16,9 @@ SINGULARITY_IMG=${WORKDIR}/metadata/agalma.simg
 
 IDS=(
 #Pencil_combined
-Hp_combined
+#Hp_combined
 #LvGrn_combined
-#LvOv_combined
+LvOv_combined
 #LvRed_combined
 #Sp_combined
 )

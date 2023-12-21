@@ -3,6 +3,9 @@
 *.sam
 *.bam
 data/
+*.sif
+*.simg
+*.gz
 
 ### BELOW IS FOR R projects. Feel free to delete if you don't have an R project ###
 # History files
