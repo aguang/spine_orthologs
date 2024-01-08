@@ -1,3 +1,15 @@
+# 1/8/23 - transdecoder, LvOv assembly
+
+## LvOv assembly
+
+ * LvOv assembly is finished!
+
+## Transdecoder
+
+ * Transdecoder seems to have timed out with 24hr, rerunning with 48hr and 32G memory
+ * Also, version using before was 5.4.0 (from module load), now using 5.7.1 from singularity image
+ * Including LvOv as well... although we have to rerun hmmer for it so maybe it will not complete
+
 # 12/20/23 - transdecoder, LvOv assembly run
 
 ## LvOv assembly
