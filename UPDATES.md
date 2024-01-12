@@ -1,4 +1,4 @@
-# 1/8/23 - transdecoder, LvOv assembly
+# 1/8/23 - transdecoder, LvOv assembly, OrthoFinder
 
 ## LvOv assembly
 
@@ -9,6 +9,11 @@
  * Transdecoder seems to have timed out with 24hr, rerunning with 48hr and 32G memory
  * Also, version using before was 5.4.0 (from module load), now using 5.7.1 from singularity image
  * Including LvOv as well... although we have to rerun hmmer for it so maybe it will not complete
+ * Seems like the cache was enough for it to be basically finished immediately
+
+## OrthoFinder
+
+ * Ran OrthoFinder (`07_orthofinder.sh`) on existing proteomes which is basically everything except LvOv.
 
 # 12/20/23 - transdecoder, LvOv assembly run
 

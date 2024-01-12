@@ -49,4 +49,4 @@ echo $ID
 # transdecoder only recognizes directory you are in
 cd $AGALMA/transcriptome-${ID}
 singularity exec ${SINGULARITY_IMG} TransDecoder.Predict -t $AGALMA/transcriptome-${ID}/${ID}_combined.fa --retain_pfam_hits $TRANSCRIPTOMES/${ID}.pfam.domtblout --retain_blastp_hits ${AGALMA}/transcriptome-${ID}/blastp.tsv
-cp -r ${ID}_combined.fa.transdecoder_dir $PROTEOMES
+cp -r ${ID}_combined.fa.transdecoder* $PROTEOMES
