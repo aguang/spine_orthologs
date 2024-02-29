@@ -1,0 +1,55 @@
+---
+title: "orthofinder_summary"
+format: html
+editor: visual
+---
+
+# How many are in different combos?
+
+Basically, we want to see how many are present in all species, in combos of 3 out of 4, 2 out of 4, exclusive to one species. For these we want to make a folder for each that has a table with the columns:
+
+-   Orthogroup ID
+-   Size of orthogroup
+-   Gene IDs for species a, b, c, d
+
+and sequences for that orthogroup.
+
+Additionally, we will generate an upset plot that summarizes the number of:
+
+-   Orthogroups with 4, combos of 3, combos of 2, unique species
+-   Orthologs and their overlaps
+
+## 
+
+```{r}
+#| include: false
+library(tidyverse)
+PATH <- "/Users/aguang/CORE/spine_orthologs"
+DATA <- "/Users/aguang/Google Drive/Shared drives/CBC-HPC/Data/Spine_orthologs"
+orthogroups <- read_tsv(file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroups/Orthogroups.tsv"))
+colnames(orthogroups) <- c("Orthogroup", "Hp", "LvGrn", "LvRed", "Pencil", "Sp")
+```
+
+```{r}
+#| echo: false
+orthogroup_seqs <- file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroup_Sequences")
+folders <- file.path(DATA,"OrthoFinder/overlaps")
+
+split_orthogroups <- mutate(orthogroups,Pencilt=!is.na(Pencil),Hpt=!is.na(Hp),Spt=!is.na(Sp),LvGrnt=!is.na(LvGrn)) %>%
+    nest(data=c(Orthogroup,Hp,LvGrn,LvRed,Sp,Pencil)) %>%
+    filter(Pencilt | Hpt | Spt | LvGrnt) %>%
+    arrange(desc(Pencilt),desc(Hpt),desc(Spt),desc(LvGrnt))
+names(split_orthogroups$data) <- c("all","ET_Hp_Sp","ET_Hp_LvGrn","ET_Hp","ET_Sp_LvGrn",
+                                   "ET_Sp","ET_LvGrn","ET","Hp_Sp_LvGrn","Hp_Sp",
+                                   "Hp_LvGrn","Hp","Sp_Lvgrn","Sp","LvGrn")
+```
+
+## Number of orthogroups
+
+```{r, num_ogs}
+#| echo: false
+num_ogs <- sapply(split_orthogroups$data, nrow) %>% as.data.frame()
+num_ogs$groups <- rownames(num_ogs)
+colnames(num_ogs) <- c("count", "groups")
+ggplot(num_ogs, aes(x=groups,y=count)) + geom_col() + theme(axis.text.x = element_text(angle=90)) + ylab("Number of Orthogroups") + xlab("Groupings")
+```
