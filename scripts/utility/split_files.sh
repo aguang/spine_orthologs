@@ -8,7 +8,7 @@
 # the ogs.txt list was generated with split_sequences.R from the orthogroups.tsv data table
 
 ORTHO=/gpfs/data/datasci/aguang/spine_orthologs/data/proteomes/spine/OrthoFinder
-for i in "$ORTHO"/overlaps/*
+for i in "$ORTHO"/overlaps/ET_Sp_LvGrn
 do
     echo $i
     while read -r line
