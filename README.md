@@ -7,6 +7,11 @@ There are a few sections to the analysis:
  * Identification of orthologs in spine-specific transcriptomes
  * Estimation of tissue specificty to orthologs relative to other transcriptomes such as gonads and embryo.
 
+## To reproduce
+
+ * To reproduce starting from intermediate results (i.e. after assembly, ortholog identification, annotation) run associated notebooks in the **notebooks** directory
+ * To reproduce starting from raw reads, run scripts in order in **scripts** directory
+
 ## References
 
  * *H.pulcherrimus:* https://cell-innovation.nig.ac.jp/cgi-bin/Hpul_public/Hpul_annot_download.cgi
