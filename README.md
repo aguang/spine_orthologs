@@ -1,5 +1,12 @@
 # Echinoderma spine orthologs
 
+This repository contains code used to generate orthologs and tissue specificty scores for a spine ortholog project with Cosmo Pieplow and Gary Wessel in the Ecology and Evolutionary Biology department.
+
+There are a few sections to the analysis:
+ * A summary of orthologs in reference transcriptomes
+ * Identification of orthologs in spine-specific transcriptomes
+ * Estimation of tissue specificty to orthologs relative to other transcriptomes such as gonads and embryo.
+
 ## References
 
  * *H.pulcherrimus:* https://cell-innovation.nig.ac.jp/cgi-bin/Hpul_public/Hpul_annot_download.cgi
@@ -9,20 +16,8 @@
 
 ## Directory organization
 
- * **metadata:** Contains Dockerfiles
- * **scripts:** Contains scripts for running Orthofinder, TransDecoder, etc etc
+ * **data:** All relevant data for this project. Scripts to run use paths based off of this directory, but you can view the data on Google Drive as well.
+ * **metadata:** Contains Dockerfiles. On Oscar also contains Singularity images.
+ * **scripts:** Contains scripts for transcriptome assembly (agalma), translation (TransDecoder), OrthoFinder (ortholog identification), annotation (Trinotate). To reproduce the analyses, follow the steps in this directory.
+ * **notebooks:** Contains notebooks for some summary statistics on all steps in scripts.
  * **results:** any files that will be provided to the collaborator
-
-This template also comes with a pre-written github action workflow that will work out-of-the-box as is and automates the process of updating docker images for your analysis project, publishing these updates, and image versioning. To ensure this workflow works for your new repo, you will need to create **two github secrets** for your repo as follows:
-
-# CBC Project Information
-
-```
-title:
-tags:
-analysts:
-git_repo_url:
-resources_used:
-summary:
-project_id:
-```
