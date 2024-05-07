@@ -26,7 +26,7 @@ Sp
 for ID in "${IDS[@]}"
 do
     echo $ID
-    cp -r ${AGALMA}/transcriptome-${ID}/${ID}_combined.fa.transdecoder.* $PROTEOMES
+    cp -r ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta.transdecoder.* $PROTEOMES
 done
 
 singularity exec ${SINGULARITY_IMG} orthofinder -f $PROTEOMES

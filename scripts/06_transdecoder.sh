@@ -2,8 +2,7 @@
 #SBATCH -n 4
 #SBATCH --mem=32G
 #SBATCH -t 48:00:00
-#SBATCH --array=0
-# later do 0-5
+#SBATCH --array=0-5
 #SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/06_transdecoder-%J.err
 #SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/06_transdecoder-%J.out
 
@@ -31,24 +30,27 @@ mv transcriptome-8 transcriptome-Hp
 mv transcriptome-11 transcriptome-LvOv
 """
 
-#IDS=(
-#Pencil
-#Hp
-#LvGrn
-#LvOv
-#LvRed
-#Sp
-#)
+IDS=(
+Pencil
+Hp
+LvGrn
+LvOv
+LvRed
+Sp
+)
 
-#ID=${IDS[$SLURM_ARRAY_TASK_ID]}
-ID=LvOv
+ID=${IDS[$SLURM_ARRAY_TASK_ID]}
+#ID=LvOv
 echo $ID
 
-#cd $TRANSCRIPTOMES
-hmmsearch --cpu 8 -E 1e-10 --domtblout $TRANSCRIPTOMES/${ID}.pfam.domtblout $METADATA/Pfam-A.hmm ${AGALMA}/transcriptome-${ID}/${ID}_combined.fa.transdecoder_dir/longest_orfs.pep
+cd $AGALMA/transcriptome-${ID}/trinity_out_dir
+cp Trinity.fasta ${ID}.fasta
+singularity exec ${SINGULARITY_IMG} TransDecoder.LongOrfs -t ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta
+cd $TRANSCRIPTOMES
+hmmsearch --cpu 8 -E 1e-10 --domtblout $TRANSCRIPTOMES/${ID}.pfam.domtblout $METADATA/Pfam-A.hmm ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta.transdecoder_dir/longest_orfs.pep
 # use blastp hits from agalma
 
 # transdecoder only recognizes directory you are in
-cd $AGALMA/transcriptome-${ID}
-singularity exec ${SINGULARITY_IMG} TransDecoder.Predict -t $AGALMA/transcriptome-${ID}/${ID}_combined.fa --retain_pfam_hits $TRANSCRIPTOMES/${ID}.pfam.domtblout --retain_blastp_hits ${AGALMA}/transcriptome-${ID}/blastp.tsv
-cp -r ${ID}_combined.fa.transdecoder* $PROTEOMES
+cd $AGALMA/transcriptome-${ID}/trinity_out_dir
+singularity exec ${SINGULARITY_IMG} TransDecoder.Predict -t ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta --retain_pfam_hits $TRANSCRIPTOMES/${ID}.pfam.domtblout --retain_blastp_hits ${AGALMA}/transcriptome-${ID}/blastp.tsv
+cp -r ${ID}.fasta.transdecoder* $PROTEOMES/

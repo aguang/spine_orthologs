@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -t 48:00:00
-#SBATCH --mem 128G
+#SBATCH -t 96:00:00
+#SBATCH --mem 256G
 #SBATCH --cpus-per-task=8
-#SBATCH --array=1,2,3,5
+#SBATCH --array=0-5
 #SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/08_trinotate/08_trinotate-%J.err
 #SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/08_trinotate/08_trinotate-%J.out
 
@@ -30,10 +30,10 @@ ID=${IDS[$SLURM_ARRAY_TASK_ID]}
 echo $ID
 
 cd $ANNOTATIONS
-mkdir -p ${ID}
-cd ${ID}
+mkdir -p ${ID}_run2
+cd ${ID}_run2
 
-TRANSDECODER=$PROTEOMES/spine/${ID}_combined.fa.transdecoder.pep
+TRANSDECODER=$PROTEOMES/spine/${ID}.fasta.transdecoder.pep
 FASTA=$AGALMA/transcriptome-${ID}/trinity_out_dir/Trinity.fasta
 
 # should go into 00_env.sh cuz you only run once
@@ -51,7 +51,7 @@ singularity exec ${SINGULARITY_IMG} ${TRINOTATE_HOME}/Trinotate --db ${ID}_Trino
 	    --transcript_fasta $FASTA \
 	    --transdecoder_pep $TRANSDECODER \
 	    --trinotate_data_dir $METADATA \
-	    --run "signalp6"
-#	    --run "swissprot_blastp swissprot_blastx pfam signalp6"
+	    --run "swissprot_blastp swissprot_blastx pfam signalp6"
+#	    --run "signalp6"
 
-singularity exec ${SINGULARITY_IMG} ${TRINOTATE_HOME}/Trinotate --db ${ID}_Trinotate.sqlite --report > ${ID}_Trinotate.tsv
+singularity exec ${SINGULARITY_IMG} ${TRINOTATE_HOME}/Trinotate --db ${ID}_Trinotate.sqlite --report > ${ID}_Trinotate_v2.tsv
