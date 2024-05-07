@@ -47,3 +47,8 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+
+# Added by cargo
+
+/target

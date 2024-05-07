@@ -24,15 +24,16 @@ Additionally, we will generate an upset plot that summarizes the number of:
 ```{r}
 #| include: false
 library(tidyverse)
+library(kableExtra)
 PATH <- "/Users/aguang/CORE/spine_orthologs"
-DATA <- "/Users/aguang/Google Drive/Shared drives/CBC-HPC/Data/Spine_orthologs"
-orthogroups <- read_tsv(file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroups/Orthogroups.tsv"))
-colnames(orthogroups) <- c("Orthogroup", "Hp", "LvGrn", "LvRed", "Pencil", "Sp")
+#DATA <- "/Users/aguang/Google Drive/Shared drives/CBC-HPC/Data/Spine_orthologs"
+#orthogroups <- read_tsv(file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroups/Orthogroups.tsv"))
+#colnames(orthogroups) <- c("Orthogroup", "Hp", "LvGrn", "LvRed", "Pencil", "Sp")
 ```
 
 ```{r}
 #| echo: false
-orthogroup_seqs <- file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroup_Sequences")
+#| eval: false
 folders <- file.path(DATA,"OrthoFinder/overlaps")
 
 split_orthogroups <- mutate(orthogroups,Pencilt=!is.na(Pencil),Hpt=!is.na(Hp),Spt=!is.na(Sp),LvGrnt=!is.na(LvGrn)) %>%
@@ -42,14 +43,41 @@ split_orthogroups <- mutate(orthogroups,Pencilt=!is.na(Pencil),Hpt=!is.na(Hp),Sp
 names(split_orthogroups$data) <- c("all","ET_Hp_Sp","ET_Hp_LvGrn","ET_Hp","ET_Sp_LvGrn",
                                    "ET_Sp","ET_LvGrn","ET","Hp_Sp_LvGrn","Hp_Sp",
                                    "Hp_LvGrn","Hp","Sp_Lvgrn","Sp","LvGrn")
+
+lapply(names(split_orthogroups$data), function(x) {
+    ogs <- split_orthogroups$data[[x]]
+    path <- file.path(folders, x)
+    write_csv(ogs, file.path(path,"ogs.csv"))
+})
 ```
 
 ## Number of orthogroups
 
 ```{r, num_ogs}
 #| echo: false
+#| eval: false
 num_ogs <- sapply(split_orthogroups$data, nrow) %>% as.data.frame()
 num_ogs$groups <- rownames(num_ogs)
 colnames(num_ogs) <- c("count", "groups")
 ggplot(num_ogs, aes(x=groups,y=count)) + geom_col() + theme(axis.text.x = element_text(angle=90)) + ylab("Number of Orthogroups") + xlab("Groupings")
 ```
+
+# Annotation summary statistics
+
+
+We ran Trinotate with blastp, blastx and hmmer to annotate the transcripts. Reults are in \`.tsv\` sheets in Google Drive. blastx results are from transcripts, and blastp results are from proteins.
+
+```{r, annotations}
+#| echo: false
+annotations<-list.files(file.path(PATH,"/data/annotations"), full.names = TRUE) %>%
+    grep("_v2.tsv", ., value=TRUE) %>%
+    read_tsv(id="species") %>%
+    mutate(species=str_split_i(species,"/",9) %>% str_split_i("_",1))
+
+annotations_summary <- annotations %>% group_by(species) %>%
+    summarise(ngenes=n_distinct(`#gene_id`)-1, ntranscript=n_distinct(transcript_id)-1, nprot=n_distinct(prot_id)-1, nblastp=n_distinct(sprot_Top_BLASTP_hit)-1, nblastx=n_distinct(sprot_Top_BLASTX_hit)-1)
+
+kable(annotations_summary)
+```
+
+
