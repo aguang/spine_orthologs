@@ -6,7 +6,8 @@
 #SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/06_transdecoder-%J.err
 #SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/06_transdecoder-%J.out
 
-module load blast/2.6.0+ hmmer/3.1b2
+module load hpcx-mpi/4.1.5rc2s-yflad4v
+module load blast-plus/2.2.30-cyxldrt hmmer-mpi/3.3.2-wyoo2te
 
 WORKDIR=/oscar/data/datasci/aguang/spine_orthologs
 AGALMA=$WORKDIR/data/agalma/scratch
@@ -26,9 +27,8 @@ mv transcriptome-4 transcriptome-LvGrn
 mv transcriptome-6 transcriptome-LvRed
 mv transcriptome-7 transcriptome-Sp
 mv transcriptome-8 transcriptome-Hp
-"""
-cd $AGALMA
 mv transcriptome-11 transcriptome-LvOv
+"""
 
 IDS=(
 Pencil
@@ -40,13 +40,17 @@ Sp
 )
 
 ID=${IDS[$SLURM_ARRAY_TASK_ID]}
+#ID=LvOv
 echo $ID
 
-#cd $TRANSCRIPTOMES
-#hmmsearch --cpu 8 -E 1e-10 --domtblout $TRANSCRIPTOMES/${ID}.pfam.domtblout $METADATA/Pfam-A.hmm ${AGALMA}/transcriptome-${ID}/${ID}_combined.fa.transdecoder_dir/longest_orfs.pep
+cd $AGALMA/transcriptome-${ID}/trinity_out_dir
+cp Trinity.fasta ${ID}.fasta
+singularity exec ${SINGULARITY_IMG} TransDecoder.LongOrfs -t ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta
+cd $TRANSCRIPTOMES
+hmmsearch --cpu 8 -E 1e-10 --domtblout $TRANSCRIPTOMES/${ID}.pfam.domtblout $METADATA/Pfam-A.hmm ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta.transdecoder_dir/longest_orfs.pep
 # use blastp hits from agalma
 
 # transdecoder only recognizes directory you are in
-cd $AGALMA/transcriptome-${ID}
-singularity exec ${SINGULARITY_IMG} TransDecoder.Predict -t $AGALMA/transcriptome-${ID}/${ID}_combined.fa --retain_pfam_hits $TRANSCRIPTOMES/${ID}.pfam.domtblout --retain_blastp_hits ${AGALMA}/transcriptome-${ID}/blastp.tsv
-cp -r ${ID}_combined.fa.transdecoder* $PROTEOMES
+cd $AGALMA/transcriptome-${ID}/trinity_out_dir
+singularity exec ${SINGULARITY_IMG} TransDecoder.Predict -t ${AGALMA}/transcriptome-${ID}/trinity_out_dir/${ID}.fasta --retain_pfam_hits $TRANSCRIPTOMES/${ID}.pfam.domtblout --retain_blastp_hits ${AGALMA}/transcriptome-${ID}/blastp.tsv
+cp -r ${ID}.fasta.transdecoder* $PROTEOMES/
