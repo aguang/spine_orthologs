@@ -1,9 +1,13 @@
 #!/bin/bash
-#SBATCH -c 20
-#SBATCH --mem 120G
+#SBATCH -c 8
+#SBATCH -A cbc-condo
+#SBATCH --mem 32G
 #SBATCH -t 4-00:00:00
 #SBATCH -e /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/09_other_tissues-%J.err
 #SBATCH -o /oscar/data/datasci/aguang/spine_orthologs/scripts/logs/09_other_tissues-%J.out
+
+module load hpcx-mpi/4.1.5rc2s-yflad4v
+module load blast-plus/2.2.30-cyxldrt hmmer-mpi/3.3.2-wyoo2te
 
 # Exit on error
 set -e
@@ -26,32 +30,35 @@ MAPPING_DIR=${DATA}/${PROJECT_ID}/"rsem_output"
 mkdir -p ${OUTPUT_DIR} ${ASSEMBLY_DIR} ${MAPPING_DIR}
 
 echo "Downloading raw FASTA/FASTQ files from ENA..."
+echo "slurm_cpus_per_task"
+echo ${SLURM_CPUS_PER_TASK}
 #cd ${OUTPUT_DIR}
 #bash ${WORKDIR}/scripts/utility/download_PRJNA554218.sh
-bash ${WORKDIR}/scripts/utility/count_and_write_samples.sh ${OUTPUT_DIR} ${PROJECT_ID}
+#bash ${WORKDIR}/scripts/utility/count_and_write_samples.sh ${OUTPUT_DIR} ${PROJECT_ID}
 
 # 2. Run Trinity for transcriptome assembly
-cd ${ASSEMBLY_DIR}
-echo "Running Trinity assembly..."
-singularity exec ${SINGULARITY_IMG} Trinity --seqType fq \
-	--max_memory ${SLURM_MEM_PER_NODE} \
-        --CPU ${SLURM_CPUS_PER_TASK} \
-        --samples_file ${OUTPUT_DIR}/${PROJECT_ID}_samples_file.tsv \
-        --output ${ASSEMBLY_DIR}
+#cd ${ASSEMBLY_DIR}
+#echo "Running Trinity assembly..."
+	     #--max_memory ${SLURM_MEM_PER_NODE} \ # can't parse because needs to be xG value
+#singularity exec ${SINGULARITY_IMG} Trinity --seqType fq \
+#	    --max_memory 240G \
+#        --CPU ${SLURM_CPUS_PER_TASK} \
+#        --samples_file ${OUTPUT_DIR}/${PROJECT_ID}_samples_file.tsv \
+#        --output ${ASSEMBLY_DIR}
 
 # 3. Map reads back to the reference with Trinity's script (align_and_estimate_abundance.pl)
-TRANSCRIPT_FASTA="${ASSEMBLY_DIR}/Trinity.fasta"
+TRANSCRIPT_FASTA="${ASSEMBLY_DIR}.Trinity.fasta"
 echo "Mapping reads back to reference using RSEM..."
-singularity exec ${SINGULARITY_IMG} /usr/local/bin/util/align_and_estimate_abundance.pl --transcripts ${TRANSCRIPT_FASTA} \
-                                --seqType fq \
-				--samples_file ${OUTPUT_DIR}/${PROJECT_ID}_samples_file.tsv \
-				--max_memory ${SLURM_MEM_PER_NODE} \
-                                --est_method RSEM \
-                                --aln_method bowtie2 \
-                                --gene_trans_map ${ASSEMBLY_DIR}/Trinity.fasta.gene_trans_map \
-                                --output_dir ${MAPPING_DIR} \
-                                --prep_reference \
-                                --thread_count ${SLURM_CPUS_PER_TASK}
+cd ${MAPPING_DIR} # I guess this script doesn't actually output them to --output_dir
+#singularity exec ${SINGULARITY_IMG} /usr/local/bin/util/align_and_estimate_abundance.pl --transcripts ${TRANSCRIPT_FASTA} \
+#                                --seqType fq \
+#				--samples_file ${OUTPUT_DIR}/${PROJECT_ID}_samples_file.tsv \
+#                                --est_method RSEM \
+#                                --aln_method bowtie2 \
+#                                --gene_trans_map ${ASSEMBLY_DIR}.Trinity.fasta.gene_trans_map \
+#                                --output_dir ${MAPPING_DIR} \
+#                                --prep_reference \
+#                                --thread_count ${SLURM_CPUS_PER_TASK}
 
 # 4. Generate counts matrices
 echo "Generating counts matrices for genes and transcripts..."
@@ -62,7 +69,7 @@ TRANSCRIPT_RESULT_FILES=$(find ${MAPPING_DIR} -name "*.isoforms.results")
 # Generate transcript-level counts matrix
 mkdir -p ${COUNTS_DIR}/${ID}
 singularity exec ${SINGULARITY_IMG} /usr/local/bin/util/abundance_estimates_to_matrix.pl --est_method RSEM \
-    --gene_trans_map ${ASSEMBLY_DIR}/Trinity.fasta.gene_trans_map \
+    --gene_trans_map ${ASSEMBLY_DIR}.Trinity.fasta.gene_trans_map \
     --out_prefix ${COUNTS_DIR}/${ID}/${ID} \
     --name_sample_by_basedir \
     ${TRANSCRIPT_RESULT_FILES}
@@ -86,16 +93,20 @@ TRANSDECODER_IMG=${WORKDIR}/metadata/transdecoder.v5.7.1.simg
 
 echo "Transdecoder longORfs"
 cp ${TRANSCRIPT_FASTA} ${PROJECT_ID}.fasta
-singularity exec ${TRANSDECODER_IMG} TransDecoder.LongOrfs -t ${TRANSCRIPT_FASTA}
+singularity exec ${TRANSDECODER_IMG} TransDecoder.LongOrfs -t ${PROJECT_ID}.fasta
 
 echo "Hmmsearch"
 hmmsearch --cpu 8 -E 1e-10 --domtblout ${PROJECT_ID}.pfam.domtblout $METADATA/Pfam-A.hmm ${PROJECT_ID}.fasta.transdecoder_dir/longest_orfs.pep
 
+echo "blastp"
+blastp -query ${PROJECT_ID}.fasta.transdecoder_dir/longest_orfs.pep  \
+    -db ${METADATA}/uniprot_sprot.fasta  -max_target_seqs 1 \
+    -outfmt 6 -evalue 1e-5 -num_threads ${SLURM_CPUS_PER_TASK} > blastp.outfmt6
 
 echo "Running transdecoder predict"
 singularity exec ${TRANSDECODER_IMG} TransDecoder.Predict -t ${PROJECT_ID}.fasta \
 	    --retain_pfam_hits $WORKDIR/data/transcriptomes/${PROJECT_ID}.pfam.domtblout \
-	    --retain_blastp_hits $ASSEMBLY_DIR/blastp.tsv
+	    --retain_blastp_hits $ASSEMBLY_DIR/blastp.outfmt6
 
 echo "Running trinotate..."
 cp $METADATA/TrinotateBoilerplate.sqlite ./${PROJECT_ID}_Trinotate.sqlite

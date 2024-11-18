@@ -19,10 +19,13 @@ fi
 # Find all R1 files and match them with their R2 pairs
 rep_count=1  # Initialize replicate counter
 
+# make new file
+echo "" > $OUTPUT_FILE
+
 for file1 in $(find "$INPUT_DIR" -type f -name "*_1.fastq.gz" | sort); do
 #    echo ${file1}
     # Construct the R2 file path by replacing _R1 with _R2
-    file2=${file1/_R1.fastq.gz/_R2.fastq.gz}
+    file2=${file1/_1.fastq.gz/_2.fastq.gz}
 
     # Check if both pairs exist
     if [[ -f "$file2" ]]; then

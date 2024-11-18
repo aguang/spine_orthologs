@@ -81,5 +81,7 @@ singularity exec ${TRINOTATE_IMG} ${TRINOTATE_HOME}/util/Trinotate_get_feature_n
 # needs to be from trinity - https://github.com/trinityrnaseq/trinityrnaseq/issues/1250
 # ${TRINITY_HOME} - https://github.com/trinityrnaseq/trinityrnaseq/wiki/Functional-Annotation-of-Transcripts
 #echo ${COUNTS_DIR}/${ID}/${ID}.gene_counts_matrix
+#echo ${COUNTS_DIR}/${ID}/${ID}_gene_counts_matrix_annot.tsv
+#echo $WORKDIR/data/annotations/${ID}_run2/${ID}_annot_feature_map.txt
 singularity exec ${SINGULARITY_IMG} ${TRINITY_HOME}/Analysis/DifferentialExpression/rename_matrix_feature_identifiers.pl \
 	    ${COUNTS_DIR}/${ID}/${ID}.gene.counts.matrix $WORKDIR/data/annotations/${ID}_run2/${ID}_annot_feature_map.txt > ${COUNTS_DIR}/${ID}/${ID}_gene_counts_matrix_annot
