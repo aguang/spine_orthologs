@@ -13,9 +13,14 @@ You must also have access to the raw data, which is assumed to be in the `data/f
 # Files
 
  * `00_env.sh` sets up the environment by downloading tagged versions of the singularity images used in the analysis to the `metadata` folder.
- * The next two scripts are standalone for a reference transcriptome analysis of orthogroups. They do not have to be run for the rest of the analysis to function.
+
+## Reference transcriptome
+
+ The next two scripts are standalone for a reference transcriptome analysis of orthogroups. They do not have to be run for the rest of the analysis to function.
    * `01_transdecoder_ET.sh` runs transdecoder on the ET reference to get a reference proteome. Transdecoder is pulled from the Oscar modules rather than a singularity image.
    * `02_orthofinder.sh` runs OrthoFinder2 on the reference transcriptomes to get a general overview of orthogroups between the species.
+
+## Transcriptome assembly and orthologous gene identification
  * `03_agalma_catalog.sh` catalogs the spine tissue data in a BioLite database and concatenates the raw reads into a combined fastq file for each species for input into agalma/Trinity.
  * `04_agalma_assemble.sh` runs the agalma transcriptome assembly pipeline
  * `05_assemble_qc.sh` runs bowtie2 on the assemblies to [assess assembly quality](https://github.com/trinityrnaseq/trinityrnaseq/wiki/RNA-Seq-Read-Representation-by-Trinity-Assembly).

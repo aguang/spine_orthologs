@@ -4,7 +4,41 @@ format: html
 editor: visual
 ---
 
-# How many are in different combos?
+# Overview
+
+Three files were generated:
+
+-   
+
+We ran OrthoFinder2 to identify phylogenetic hierarchical orthogroups, then Trinotate with blastx and blastp to annotate transcripts. This report has some summary information on each as well as the split files for them.
+
+```{r, setup}
+#| include: false
+library(tidyverse)
+library(kableExtra)
+library(ggtree)
+library(treeio)
+PATH <- "/Users/aguang/CORE/spine_orthologs"
+orthogroups <- read_tsv(file.path(PATH,"data/orthofinder/Phylogenetic_Hierarchical_Orthogroups/N0.tsv"))
+colnames(orthogroups) <- c("HOG","Orthogroup", "Gene_Tree_Parent_Clade", "Hp", "LvGrn","LvOv", "LvRed", "Pencil", "Sp")
+species_tree <- read.newick(file.path(PATH,"data/orthofinder/Species_Tree/SpeciesTree_rooted_node_labels.txt"))
+```
+
+# OrthoFinder2 summary
+
+From the log output:
+
+OrthoFinder assigned 444281 genes (84.7% of total) to 61455 orthogroups. Fifty percent of all genes were in orthogroups with 10 or more genes (G50 was 10) and were contained in the largest 13904 orthogroups (O50 was 13904). There were 9627 orthogroups with all species present and 89 of these consisted entirely of single-copy genes.
+
+The species tree looks roughly correct.
+
+```{r, species_tree}
+species_tree$tip.label <- c("Pencil","Sp","Hp","LvOv","LvGrn","LvRed")
+species_tree$tip.label <- c("Pencil","Sp","Hp","LvOv","LvGrn","LvRed")
+ggtree(species_tree, ladderize=FALSE) + geom_tiplab() + theme_tree2()
+```
+
+## How many are in different combos?
 
 Basically, we want to see how many are present in all species, in combos of 3 out of 4, 2 out of 4, exclusive to one species. For these we want to make a folder for each that has a table with the columns:
 
@@ -14,37 +48,25 @@ Basically, we want to see how many are present in all species, in combos of 3 ou
 
 and sequences for that orthogroup.
 
-Additionally, we will generate an upset plot that summarizes the number of:
-
--   Orthogroups with 4, combos of 3, combos of 2, unique species
--   Orthologs and their overlaps
-
-## 
-
-```{r}
-#| include: false
-library(tidyverse)
-PATH <- "/Users/aguang/CORE/spine_orthologs"
-DATA <- "/Users/aguang/Google Drive/Shared drives/CBC-HPC/Data/Spine_orthologs"
-orthogroups <- read_tsv(file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroups/Orthogroups.tsv"))
-colnames(orthogroups) <- c("Orthogroup", "Hp", "LvGrn", "LvRed", "Pencil", "Sp")
-```
-
-```{r}
+```{r, orthogroups}
 #| echo: false
-orthogroup_seqs <- file.path(DATA,"OrthoFinder/Results_Jan08/Orthogroup_Sequences")
-folders <- file.path(DATA,"OrthoFinder/overlaps")
+results <- file.path(PATH,"results")
 
-split_orthogroups <- mutate(orthogroups,Pencilt=!is.na(Pencil),Hpt=!is.na(Hp),Spt=!is.na(Sp),LvGrnt=!is.na(LvGrn)) %>%
-    nest(data=c(Orthogroup,Hp,LvGrn,LvRed,Sp,Pencil)) %>%
+split_orthogroups <- mutate(orthogroups,Pencilt=!is.na(Pencil),Hpt=!is.na(Hp),Spt=!is.na(Sp),LvGrnt=!is.na(LvGrn),LvOvt=!is.na(LvOv),LvRedt=!is.na(LvRed)) %>%
+    nest(data=c(HOG,Gene_Tree_Parent_Clade,Orthogroup,Hp,LvGrn,Sp,Pencil,LvOv,LvRed,LvOvt,LvRedt)) %>%
     filter(Pencilt | Hpt | Spt | LvGrnt) %>%
     arrange(desc(Pencilt),desc(Hpt),desc(Spt),desc(LvGrnt))
 names(split_orthogroups$data) <- c("all","ET_Hp_Sp","ET_Hp_LvGrn","ET_Hp","ET_Sp_LvGrn",
                                    "ET_Sp","ET_LvGrn","ET","Hp_Sp_LvGrn","Hp_Sp",
                                    "Hp_LvGrn","Hp","Sp_Lvgrn","Sp","LvGrn")
+
+tmp <- lapply(names(split_orthogroups$data), function(x) {
+    ogs <- split_orthogroups$data[[x]]
+    write_csv(ogs, file.path(results,paste0(x,"_ogs.csv")))
+})
 ```
 
-## Number of orthogroups
+We also take a look at the number of orthogroups of each combination.
 
 ```{r, num_ogs}
 #| echo: false
@@ -52,4 +74,131 @@ num_ogs <- sapply(split_orthogroups$data, nrow) %>% as.data.frame()
 num_ogs$groups <- rownames(num_ogs)
 colnames(num_ogs) <- c("count", "groups")
 ggplot(num_ogs, aes(x=groups,y=count)) + geom_col() + theme(axis.text.x = element_text(angle=90)) + ylab("Number of Orthogroups") + xlab("Groupings")
+```
+
+# Annotation summary statistics
+
+We ran Trinotate with blastp and blastx to annotate the transcripts. Results are in \`.tsv\` sheets in Google Drive. blastx results are from transcripts, and blastp results are from proteins. We ran hmmer as well, but it was on a previous mapping of genes to transcripts and so the results were not added into the DB. If desired this can be redone and output here as well.
+
+```{r, annotations}
+#| echo: false
+annotations<-list.files(file.path(PATH,"/data/annotations"), full.names = TRUE) %>%
+    grep("_v2.tsv", ., value=TRUE) %>%
+    read_tsv(id="species") %>%
+    mutate(species=str_split_i(species,"/",9) %>% str_split_i("_",1))
+
+annotations_summary <- annotations %>% group_by(species) %>%
+    summarise(ngenes=n_distinct(`#gene_id`)-1, ntranscript=n_distinct(transcript_id)-1, nprot=n_distinct(prot_id)-1, nblastp=n_distinct(sprot_Top_BLASTP_hit)-1, nblastx=n_distinct(sprot_Top_BLASTX_hit)-1)
+
+kable(annotations_summary)
+```
+
+## Combining annotations and orthogroup files
+
+Here we:
+
+-   Made into long format (one row for each gene in orthogroup) the orthogroups file
+
+-   Filtered the annotations:
+
+    -   into just the rows that had a blastp hit
+
+    -   selected just species, prot_id (gene), blastp hit, go_blastp hit columns
+
+    -   pulled out just the gene name, RecName, and Taxonomy in the blastp hit (i.e. discarded evalues and when a gene had multiple hits)
+
+    -   shortened the RecName to just the relevant part
+
+-   Then left joined the two tables into a larger table
+
+```{r join}
+ogs_prots <- pivot_longer(orthogroups, cols=Hp:Sp, names_to="Species") %>%
+    separate_longer_delim(value, delim=", ")
+
+annotations_filtered <- filter(annotations, sprot_Top_BLASTP_hit != ".")  %>%
+    select(species,prot_id, blastp=sprot_Top_BLASTP_hit, go=gene_ontology_BLASTP) %>%
+    separate_wider_delim(cols=blastp,delim="^",names=c("gene",NA,NA,NA,NA,"RecName","Taxonomy"),too_many="drop") %>%
+    mutate(RecName=substr(RecName,15,nchar(RecName)-1))
+    
+ogs_annots <- left_join(ogs_prots, annotations_filtered,by=join_by(value==prot_id, Species==species)) %>%
+    separate_longer_delim(go, delim='`')
+#saveRDS(ogs_annots, file="ogs_annots.rds")
+#write_csv(ogs_annots,file.path(results,"ogs_annots.csv"))
+```
+
+From this we can answer questions like:
+
+-   What are the most common GO terms the set of genes in this orthogroup mapped to?
+
+-   What is the count of the number of genes that mapped to the most common GO term(s)?
+
+-   What are the top 10 GO terms across all orthogroups shared by all 4 species and the number of times they appear?
+
+-   What are the most common phyla/species mappings?
+
+## Most common GO terms set of genes in orthogroup map to
+
+We created a csv file `most_common_go` that lists along with the number of genes in each group that mapped to that GO term out of the total. Note that these are **not** based off of single-copy orthologous genes, so the top hits could conceivably be paralogs from the same species mapping to the same things. There are 3 directions we can go with this:
+
+-   Make use of the single copy orthologs folder to redo this analysis ensuring we are only looking at genes that are more similar to each other than to any other genes and have functional relevance to each other
+
+-   Use OrthoSNAP, a relatively new method that attempts to distinguish and identify representative orthologs within sets of orthogroups that contain paralogs to do the same thing
+
+-   Keep results as is, assuming that paralog mappings are relevant as well (not typically done)
+
+Waiting for further discussion on this.
+
+```{r most_common_go}
+# get most common go terms and their counts in each orthogroup
+most_common_go <- ogs_annots %>%
+    filter(!is.na(go)) %>%
+    group_by(HOG) %>%
+    count(go) %>%
+    filter(n==max(n)) %>%
+    dplyr::rename(ngenes_with_go=n)
+
+# get total number of genes in orthogroup
+ngenes <- ogs_annots %>% filter(!is.na(go)) %>%
+    count(HOG,name="total")
+
+most_common_go <- left_join(most_common_go, ngenes)
+
+write_csv(most_common_go, file.path(results,"most_common_go.csv"))
+```
+
+## Top 10 GO terms across all orthogroups shared by all 4 species
+
+There are 10,228 HOGs (orthogroups) that are shared by all 4 species. 9373 of them had GO annotations, we used the most common GO terms for each group to look at what the top 10 are shared across all groups, when you look at the top 10 shared it is relatively generic. If you look at 11-20 it starts to get somewhat more interesting, but will probably want to dig into the file to fully take a look. The file is `shared_top_go.csv`.
+
+```{r top10}
+shared_ogs <- ogs_annots %>% group_by(HOG) %>%
+    filter(Species %in% c("Hp","LvGrn","Pencil","Sp")) %>% # filter out to just Hp, LvGrn, Pencil, Sp
+    filter(!is.na(value)) %>% # filter out all species that are not present in orthogroup
+    filter(n_distinct(Species)==4) # keep only groups with 4 species which is all shared
+
+#shared_top_go <- shared_ogs %>% ungroup() %>% filter(!is.na(go)) %>% filter(go != ".") %>% # filtering
+#    count(go) %>% arrange(desc(n)) # getting top OGs
+
+shared_top_go <- most_common_go[most_common_go$HOG %in% unique(shared_ogs$HOG),] %>% filter(go != ".") %>%
+    ungroup() %>% count(go) %>% arrange(desc(n))
+#write_csv(shared_top_go, file=file.path(results,"shared_top_go.csv"))
+
+ggplot(shared_top_go[1:10,]) + geom_bar(aes(x=reorder(go,-n),y=n), stat="identity") + theme(axis.text.x=element_text(angle=90,vjust=0.5, hjust=1)) + xlab("GO terms") + ylab("Number of orthogroups sharing GO term") + ggtitle("Top 10 shared GO terms")
+
+ggplot(shared_top_go[11:20,]) + geom_bar(aes(x=reorder(go,-n),y=n), stat="identity") + theme(axis.text.x=element_text(angle=90,vjust=0.5, hjust=1))+ xlab("GO terms") + ylab("Number of orthogroups sharing GO term") + ggtitle("Top 11-20 shared GO terms")
+```
+
+## Top taxonomy mappings for genes
+
+To generate this we take the last term from the taxonomy mappings as the hierarchy is rather large and unbalanced for many species. If desired can distinguish in a different way but would have to get a taxonomic list. We take the top 20 mappings as there are 1525 species mapped to already which is too large to plot. Any not in the top 20 will be categorized as Other and any without an annotation will be NA.
+
+```{r taxonomy}
+taxonomy_mappings <- distinct(ogs_annots, Species, value, .keep_all=TRUE) %>%
+    mutate(Last_taxonomy=gsub("^.*; ", "", Taxonomy))
+taxonomy_mappings$Last_taxonomy <- gsub("`.*","",taxonomy_mappings$Last_taxonomy)
+
+top_mappings <- count(taxonomy_mappings, Last_taxonomy) %>% arrange(desc(n))
+taxonomy_mappings$top <- taxonomy_mappings$Last_taxonomy
+taxonomy_mappings$top[!taxonomy_mappings$top %in% top_mappings$Last_taxonomy[1:20]] <- "Other"
+ggplot(taxonomy_mappings) + geom_bar(aes(x=top)) + theme(axis.text.x=element_text(angle=90,vjust=0.5, hjust=1))+ xlab("Taxonomy") + ylab("Number of genes mapping to taxonomy")
 ```

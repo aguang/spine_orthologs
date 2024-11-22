@@ -1,10 +1,10 @@
 # Echinoderma spine orthologs
 
-This repository contains code used to generate orthologs and tissue specificty scores for a spine ortholog project with Cosmo Pieplow and Gary Wessel in the Ecology and Evolutionary Biology department.
+This repository contains code used to generate orthologs and tissue specificty scores for a spine ortholog project with Cosmo Pieplow and Gary Wessel in the Ecology and Evolutionary Biology department at Brown University.
 
 There are a few sections to the analysis:
  * A summary of orthologs in reference transcriptomes
- * Identification of orthologs in spine-specific transcriptomes
+ * Transcriptome assembly and identification of orthologs in spine-specific transcriptomes
  * Estimation of tissue specificty to orthologs relative to other transcriptomes such as gonads and embryo.
 
 ## To reproduce
