@@ -1,6 +1,8 @@
 # Echinoderma spine orthologs
 
-This repository contains code used to generate orthologs and tissue specificty scores for a spine ortholog project with Cosmo Pieplow and Gary Wessel in the Ecology and Evolutionary Biology department at Brown University.
+This repository contains code used to generate orthologs and tissue specificty scores for a spine ortholog project with Cosmo Pieplow and Gary Wessel in the Ecology and Evolutionary Biology department at Brown University. It has been published at the following:
+
+Guang, A., Pieplow, C. & Wessel, G.M. Conservation and diversity of genes expressed in the spines of the sea urchin. *Genes Genom* (2025). https://doi.org/10.1007/s13258-025-01703-1
 
 There are a few sections to the analysis:
  * A summary of orthologs in reference transcriptomes
